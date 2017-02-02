@@ -1,16 +1,32 @@
 #pragma once
 #include "Component.h"
 #include <vector>
-
+#include <unordered_map>
+#include <typeinfo>
 using namespace std;
+
+enum class EntityTYPE
+{
+	PLAYER,
+	DOG,
+	CAT,
+	ALIEN
+};
 
 class Entity
 {
-	int id;
+private:
+	EntityTYPE m_id;
+	std::unordered_map<const std::type_info*, Component *> m_components;
 public:
 	Entity() 
 	{
 	
+	}
+
+	Entity(EntityTYPE id)
+	{
+		m_id = id;
 	}
 
 	~Entity()
@@ -18,9 +34,9 @@ public:
 
 	}
 
-	void addComponent(Component c) 
+	void addComponent(Component * c) 
 	{ 
-		components.push_back(c); 
+		m_components[&(typeid(*c))] = c; 
 	}
 
 	void removeComponent(Component c)
@@ -28,11 +44,16 @@ public:
 		/* TBI */
 	}
 
-	vector<Component> getComponents() 
+	template <typename T>
+	T * getComponent()
 	{
-		return components;
+		if (m_components.count(&typeid(T)) != 0) 
+		{
+			return static_cast<T *>(m_components[&typeid(T)]);
+		}
+		else 
+		{
+			return nullptr;
+		}
 	}
-
-private:
-	vector<Component> components;
 };
